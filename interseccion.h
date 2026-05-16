@@ -1,10 +1,10 @@
 #ifndef INTERSECCION_H
 #define INTERSECCION_H
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <pthread.h>
 #include <semaphore.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
 
 /*
@@ -21,7 +21,7 @@
 #define ESTE 2
 #define OESTE 3
 
-extern const char *NOMBRE_CARRIL[N_CARRILES];
+extern const char* NOMBRE_CARRIL[N_CARRILES];
 
 /*
  * =============================================================================
@@ -29,8 +29,8 @@ extern const char *NOMBRE_CARRIL[N_CARRILES];
  * =============================================================================
  */
 typedef struct {
-    int id; /* 0 = Norte, 1 = Sur, 2 = Este, 3 = Oeste */
-    int n_vehiculos; /* Cuantos vehiculos debe generar */
+  int id;          /* 0 = Norte, 1 = Sur, 2 = Este, 3 = Oeste */
+  int n_vehiculos; /* Cuantos vehiculos debe generar */
 } args_carril_t;
 
 /*
@@ -51,8 +51,9 @@ extern sem_t mutex_contadores;
  * PROTOTIPOS
  * =============================================================================
  */
-void *funcion_carril(void *arg);
-void imprimir_reporte(double tiempo);
+void* funcion_carril_fase1(void* arg);
+void* funcion_carril_fase2(void* arg);
+void imprimir_reporte(double tiempo_fase1, double tiempo_fase2);
 double tiempo_en_segundos(struct timespec inicio, struct timespec fin);
 
 #endif /* INTERSECCION_H */

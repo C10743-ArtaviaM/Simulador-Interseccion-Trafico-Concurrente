@@ -1,0 +1,147 @@
+/*
+ * interseccion.c
+ * Simulador de Interseccion de Trafico Concurrente
+ *
+ * CI-0117 Programacion Paralela & Concurrente - I Ciclo 2026
+ *
+ * Autores: Mauricio Artavia Monge
+ * Daniel Rodriguez Ruiz
+ */
+#define _GNU_SOURCE
+
+#include "interseccion.h"
+
+#include <unistd.h>
+
+#define _POSIX_C_SOURCE 200809L
+
+/*
+ * =============================================================================
+ * VARIABLES GLOBALES
+ * =============================================================================
+ */
+const char* NOMBRE_CARRIL[N_CARRILES] = {"Norte", "Sur", "Este", "Oeste"};
+int vehiculos_cruzados = 0;
+int accidentes = 0;
+int en_cruce = 0;
+int cola[N_CARRILES] = {0};
+int cruzados_por_carril[N_CARRILES] = {0};
+sem_t semaforo_cruce;
+sem_t mutex_contadores;
+
+/*
+ * =============================================================================
+ * UTILITARIO
+ * =============================================================================
+ */
+double tiempo_en_segundos(struct timespec inicio, struct timespec fin) {
+  return (fin.tv_sec - inicio.tv_sec) + (fin.tv_nsec - inicio.tv_nsec) / 1e9;
+}
+
+/*
+ * =============================================================================
+ * FASE 1 — sin sincronizacion
+ * =============================================================================
+ */
+void* funcion_carril_fase1(void* arg) {
+  args_carril_t* datos = (args_carril_t*)arg;
+  int id = datos->id;
+  unsigned int semilla = (unsigned int)id * 1234 + 1;
+
+  for (int i = 1; i <= datos->n_vehiculos; i++) {
+    /* 1. Generar vehiculo e incrementar cola */
+    cola[id]++;
+
+    /*
+     * 2. Verificar en_cruce SIN proteccion - aqui esta la race condition
+     *    Entre esta lectura y el en_cruce = 1 de abajo, otro hilo puede entrar
+     *    - esa ventana de tiempo es el problema TOCTOU.
+     */
+    if (en_cruce == 1) {
+      accidentes++;
+      printf("[%s-%03d] entrando al cruce  <-  ACCIDENTE\n", NOMBRE_CARRIL[id],
+             i);
+    } else {
+      printf("[%s-%03d] entrando al cruce\n", NOMBRE_CARRIL[id], i);
+    }
+
+    /* 3. Marcar cruce ocupado y cruzar */
+    en_cruce = 1;
+    usleep(2000 + rand_r(&semilla) % 3001); /* 2000 - 5000 us*/
+
+    /* 4. Liberar cruce y actualizo contadores */
+    en_cruce = 0;
+    cruzados_por_carril[id]++;
+    vehiculos_cruzados++;
+    printf("[%s-%03d] cruce completado\n", NOMBRE_CARRIL[id], i);
+  }
+
+  return NULL;
+}
+
+/*
+ * =============================================================================
+ * FASE 2 - con semaforos
+ * =============================================================================
+ */
+void* funcion_carril_fase2(void* arg) {
+  /* TODO: implementar en Fase 2 */
+  (void)arg; /* silencio de warning hasta implementarlo */
+  return NULL;
+}
+
+/*
+ * =============================================================================
+ * REPORTE FINAL
+ * =============================================================================
+ */
+void imprimir_reporte(double tiempo_fase1, double tiempo_fase2) {
+  /* TODO: implementar en Fase 3 */
+  (void)tiempo_fase1;
+  (void)tiempo_fase2;
+}
+
+/*
+ * =============================================================================
+ * MAIN
+ * =============================================================================
+ */
+int main(void) {
+  pthread_t hilos[N_CARRILES];
+  args_carril_t args[N_CARRILES];
+  struct timespec t_inicio, t_fin;
+  double tiempo_fase1 = 0.0;
+  double tiempo_fase2 = 0.0;
+
+  printf("========================================================\n");
+  printf("  SIMULADOR DE INTERSECCION DE TRAFICO - CI-0117\n");
+  printf("  Carriles: %d | Vehiculos por carril: %d\n", N_CARRILES,
+         N_VEHICULOS);
+  printf("========================================================\n\n");
+
+  /* =-=-= FASE 1 =-=-= */
+  printf("--- FASE 1: Sin sincronizacion ---\n");
+
+  vehiculos_cruzados = 0;
+  accidentes = 0;
+  en_cruce = 0;
+  for (int i = 0; i < N_CARRILES; i++) {
+    cola[i] = 0;
+    cruzados_por_carril[i] = 0;
+  }
+
+  clock_gettime(CLOCK_MONOTONIC, &t_inicio);
+  for (int i = 0; i < N_CARRILES; i++) {
+    args[i].id = i;
+    args[i].n_vehiculos = N_VEHICULOS;
+    pthread_create(&hilos[i], NULL, funcion_carril_fase1, &args[i]);
+  }
+  for (int i = 0; i < N_CARRILES; i++) pthread_join(hilos[i], NULL);
+  clock_gettime(CLOCK_MONOTONIC, &t_fin);
+  tiempo_fase1 = tiempo_en_segundos(t_inicio, t_fin);
+
+  /*=-=-= REPORTE =-=-=*/
+  imprimir_reporte(tiempo_fase1, tiempo_fase2);
+
+  return 0;
+}
