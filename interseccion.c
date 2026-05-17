@@ -88,8 +88,40 @@ void* funcion_carril_fase1(void* arg) {
  * =============================================================================
  */
 void* funcion_carril_fase2(void* arg) {
-  /* TODO: implementar en Fase 2 */
-  (void)arg; /* silencio de warning hasta implementarlo */
+  args_carril_t* datos = (args_carril_t*)arg;
+  int id = datos->id;
+  unsigned int semilla = (unsigned int)id * 1234 + 1;
+
+  for (int i = 1; i <= datos->n_vehiculos; i++) {
+    /* 1. Generar vehiculo e implementar cola */
+    cola[id]++;
+
+    /*
+     * 2. Intentamos entrar al cruce - sem_wait garantiza exclusion mutua. Solo
+     * un hilo puede pasar este punto a la vez.
+     */
+    printf("[%s-%03d] sem_wait() -> cruzando\n", NOMBRE_CARRIL[id], i);
+    sem_wait(&semaforo_cruce);
+
+    /*
+     * 3. Seccion critica: en_cruce, usleep y la liberacion bajo el mismo
+     * semaforo. No hay ya ventana TOCTOU porque nadie mas puede entrar aqui.
+     */
+    en_cruce = 1;
+    usleep(2000 + rand_r(&semilla) % 3001); /* 2000-5000 us */
+    en_cruce = 0;
+
+    sem_post(&semaforo_cruce);
+    printf("[%s-%03d] sem_post() -> cruce libre\n", NOMBRE_CARRIL[id], i);
+
+    /* 4. Actualizamos contadores protegidos por mutex_contadores */
+    sem_wait(&mutex_contadores);
+    vehiculos_cruzados++;
+    cruzados_por_carril[id]++;
+    sem_post(&mutex_contadores);
+
+    printf("[%s-%03d] cruce completado\n", NOMBRE_CARRIL[id], i);
+  }
   return NULL;
 }
 
@@ -142,6 +174,39 @@ int main(void) {
   for (int i = 0; i < N_CARRILES; i++) pthread_join(hilos[i], NULL);
   clock_gettime(CLOCK_MONOTONIC, &t_fin);
   tiempo_fase1 = tiempo_en_segundos(t_inicio, t_fin);
+
+  printf("\n--- FASE 2: Con semaforos ---\n");
+
+  vehiculos_cruzados = 0;
+  accidentes = 0;
+  en_cruce = 0;
+
+  for (int i = 0; i < N_CARRILES; i++) {
+    cola[i] = 0;
+    cruzados_por_carril[i] = 0;
+  }
+
+  sem_init(&semaforo_cruce, 0, 1);
+  sem_init(&mutex_contadores, 0, 1);
+
+  clock_gettime(CLOCK_MONOTONIC, &t_inicio);
+
+  for (int i = 0; i < N_CARRILES; i++) {
+    args[i].id = i;
+    args[i].n_vehiculos = N_VEHICULOS;
+
+    pthread_create(&hilos[i], NULL, funcion_carril_fase2, &args[i]);
+  }
+
+  for (int i = 0; i < N_CARRILES; i++) {
+    pthread_join(hilos[i], NULL);
+  }
+
+  clock_gettime(CLOCK_MONOTONIC, &t_fin);
+  tiempo_fase2 = tiempo_en_segundos(t_inicio, t_fin);
+
+  sem_destroy(&semaforo_cruce);
+  sem_destroy(&mutex_contadores);
 
   /*=-=-= REPORTE =-=-=*/
   imprimir_reporte(tiempo_fase1, tiempo_fase2);
