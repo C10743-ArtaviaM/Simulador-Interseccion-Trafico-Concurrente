@@ -130,10 +130,40 @@ void* funcion_carril_fase2(void* arg) {
  * REPORTE FINAL
  * =============================================================================
  */
-void imprimir_reporte(double tiempo_fase1, double tiempo_fase2) {
-  /* TODO: implementar en Fase 3 */
-  (void)tiempo_fase1;
-  (void)tiempo_fase2;
+void imprimir_reporte(double tiempo_fase1, double tiempo_fase2,
+                      int accidentes_fase1, int vehiculos_fase1,
+                      int cruzados_fase1[]) {
+  printf("\n======== REPORTE FINAL ========\n");
+
+#ifndef SOLO_FASE2
+  printf("Fase 1 (sin sincronizacion):\n");
+  printf("  Total vehiculos:    %d\n", vehiculos_fase1);
+  printf("  Accidentes:         %d\n", accidentes_fase1);
+  printf("  Vehiculos/carril:   Norte=%d Sur=%d Este=%d Oeste=%d\n",
+         cruzados_fase1[NORTE], cruzados_fase1[SUR], cruzados_fase1[ESTE],
+         cruzados_fase1[OESTE]);
+  printf("  Tiempo simulacion: %.3f segundos\n", tiempo_fase1);
+#endif
+
+#ifndef SOLO_FASE1
+  printf("Fase 2 (con semaforos):\n");
+  printf("  Total vehiculos:    %d\n", vehiculos_cruzados);
+  printf("  Accidentes:         %d\n", accidentes);
+  printf("  Vehiculos/carril:   Norte=%d Sur=%d Este=%d Oeste=%d\n",
+         cruzados_por_carril[NORTE], cruzados_por_carril[SUR],
+         cruzados_por_carril[ESTE], cruzados_por_carril[OESTE]);
+  printf("  Tiempo simulacion: %.3f segundos\n", tiempo_fase2);
+#endif
+
+#if !defined(SOLO_FASE1) && !defined(SOLO_FASE2)
+  double overhead = tiempo_fase2 - tiempo_fase1;
+  double porcentaje = (overhead / tiempo_fase1) * 100.0;
+  printf("ANALISIS:\n");
+  printf("  Overhead de sincronizacion: +%.3f seg (+%.1f%%)\n", overhead,
+         porcentaje);
+#endif
+
+  printf("========================================================\n");
 }
 
 /*
@@ -147,6 +177,9 @@ int main(void) {
   struct timespec t_inicio, t_fin;
   double tiempo_fase1 = 0.0;
   double tiempo_fase2 = 0.0;
+  int accidentes_fase1 = 0;
+  int vehiculos_fase1 = 0;
+  int cruzados_fase1[N_CARRILES] = {0};
 
   printf("========================================================\n");
   printf("  SIMULADOR DE INTERSECCION DE TRAFICO - CI-0117\n");
@@ -172,9 +205,20 @@ int main(void) {
     args[i].n_vehiculos = N_VEHICULOS;
     pthread_create(&hilos[i], NULL, funcion_carril_fase1, &args[i]);
   }
-  for (int i = 0; i < N_CARRILES; i++) pthread_join(hilos[i], NULL);
+
+  for (int i = 0; i < N_CARRILES; i++) {
+    pthread_join(hilos[i], NULL);
+  }
+
   clock_gettime(CLOCK_MONOTONIC, &t_fin);
   tiempo_fase1 = tiempo_en_segundos(t_inicio, t_fin);
+
+  accidentes_fase1 = accidentes;
+  vehiculos_fase1 = vehiculos_cruzados;
+
+  for (int i = 0; i < N_CARRILES; i++) {
+    cruzados_fase1[i] = cruzados_por_carril[i];
+  }
 #endif
 
 #ifndef SOLO_FASE1
@@ -214,7 +258,8 @@ int main(void) {
 #endif
 
   /*=-=-= REPORTE =-=-=*/
-  imprimir_reporte(tiempo_fase1, tiempo_fase2);
+  imprimir_reporte(tiempo_fase1, tiempo_fase2, accidentes_fase1,
+                   vehiculos_fase1, cruzados_fase1);
 
   return 0;
 }
