@@ -7,5 +7,8 @@ all: interseccion
 interseccion: interseccion.c
 	$(CC) $(CFLAGS) interseccion.c -o interseccion $(LIBS)
 
+run: interseccion
+	./interseccion
+
 clean:
 	rm -f interseccion
