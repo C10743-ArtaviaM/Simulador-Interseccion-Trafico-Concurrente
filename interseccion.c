@@ -154,7 +154,8 @@ int main(void) {
          N_VEHICULOS);
   printf("========================================================\n\n");
 
-  /* =-=-= FASE 1 =-=-= */
+/* =-=-= FASE 1 =-=-= */
+#ifndef SOLO_FASE2
   printf("--- FASE 1: Sin sincronizacion ---\n");
 
   vehiculos_cruzados = 0;
@@ -174,7 +175,10 @@ int main(void) {
   for (int i = 0; i < N_CARRILES; i++) pthread_join(hilos[i], NULL);
   clock_gettime(CLOCK_MONOTONIC, &t_fin);
   tiempo_fase1 = tiempo_en_segundos(t_inicio, t_fin);
+#endif
 
+#ifndef SOLO_FASE1
+  /* =-=-= FASE 2 =-=-= */
   printf("\n--- FASE 2: Con semaforos ---\n");
 
   vehiculos_cruzados = 0;
@@ -207,6 +211,7 @@ int main(void) {
 
   sem_destroy(&semaforo_cruce);
   sem_destroy(&mutex_contadores);
+#endif
 
   /*=-=-= REPORTE =-=-=*/
   imprimir_reporte(tiempo_fase1, tiempo_fase2);
