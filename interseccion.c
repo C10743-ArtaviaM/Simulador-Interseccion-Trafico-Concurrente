@@ -21,6 +21,7 @@
  * =============================================================================
  */
 const char* NOMBRE_CARRIL[N_CARRILES] = {"Norte", "Sur", "Este", "Oeste"};
+char vehiculo_en_cruce[16] = "";
 int vehiculos_cruzados = 0;
 int accidentes = 0;
 int en_cruce = 0;
@@ -59,14 +60,16 @@ void* funcion_carril_fase1(void* arg) {
      */
     if (en_cruce == 1) {
       accidentes++;
-      printf("[%s-%03d] entrando al cruce  <-  ACCIDENTE\n", NOMBRE_CARRIL[id],
-             i);
+      printf("[%s-%03d] entrando al cruce  <-  ACCIDENTE con %s\n",
+             NOMBRE_CARRIL[id], i, vehiculo_en_cruce);
     } else {
       printf("[%s-%03d] entrando al cruce\n", NOMBRE_CARRIL[id], i);
     }
 
     /* 3. Marcar cruce ocupado y cruzar */
     en_cruce = 1;
+    snprintf(vehiculo_en_cruce, sizeof(vehiculo_en_cruce), "%s-%03d",
+             NOMBRE_CARRIL[id], i);
     usleep(2000 + rand_r(&semilla) % 3001); /* 2000 - 5000 us*/
 
     /* 4. Liberar cruce y actualizo contadores */

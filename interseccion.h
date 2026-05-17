@@ -38,6 +38,7 @@ typedef struct {
  * VARIABLES GLOBALES
  * =============================================================================
  */
+extern char vehiculo_en_cruce[16];
 extern int vehiculos_cruzados;
 extern int accidentes;
 extern int en_cruce;
