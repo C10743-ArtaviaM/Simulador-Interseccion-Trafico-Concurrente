@@ -13,7 +13,7 @@
  * =============================================================================
  */
 #define N_CARRILES 4
-#define N_VEHICULOS 10
+#define N_VEHICULOS 50
 
 /* Identificadores de carril */
 #define NORTE 0
@@ -54,9 +54,7 @@ extern sem_t mutex_contadores;
  */
 void* funcion_carril_fase1(void* arg);
 void* funcion_carril_fase2(void* arg);
-void imprimir_reporte(double tiempo_fase1, double tiempo_fase2,
-                      int accidentes_fase1, int vehiculos_fase1,
-                      int cruzados_fase1[]);
+void imprimir_reporte(double tiempo_fase1, double tiempo_fase2, int accidentes_fase1, int vehiculos_fase1, int cruzados_fase1[]);
 double tiempo_en_segundos(struct timespec inicio, struct timespec fin);
 
 #endif /* INTERSECCION_H */

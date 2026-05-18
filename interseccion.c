@@ -60,16 +60,14 @@ void* funcion_carril_fase1(void* arg) {
      */
     if (en_cruce == 1) {
       accidentes++;
-      printf("[%s-%03d] entrando al cruce  <-  ACCIDENTE con %s\n",
-             NOMBRE_CARRIL[id], i, vehiculo_en_cruce);
+      printf("[%s-%03d] entrando al cruce  <-  ACCIDENTE con %s\n", NOMBRE_CARRIL[id], i, vehiculo_en_cruce);
     } else {
       printf("[%s-%03d] entrando al cruce\n", NOMBRE_CARRIL[id], i);
     }
 
     /* 3. Marcar cruce ocupado y cruzar */
     en_cruce = 1;
-    snprintf(vehiculo_en_cruce, sizeof(vehiculo_en_cruce), "%s-%03d",
-             NOMBRE_CARRIL[id], i);
+    snprintf(vehiculo_en_cruce, sizeof(vehiculo_en_cruce), "%s-%03d", NOMBRE_CARRIL[id], i);
     usleep(2000 + rand_r(&semilla) % 3001); /* 2000 - 5000 us*/
 
     /* 4. Liberar cruce y actualizo contadores */
@@ -130,18 +128,14 @@ void* funcion_carril_fase2(void* arg) {
  * REPORTE FINAL
  * =============================================================================
  */
-void imprimir_reporte(double tiempo_fase1, double tiempo_fase2,
-                      int accidentes_fase1, int vehiculos_fase1,
-                      int cruzados_fase1[]) {
+void imprimir_reporte(double tiempo_fase1, double tiempo_fase2, int accidentes_fase1, int vehiculos_fase1, int cruzados_fase1[]) {
   printf("\n======== REPORTE FINAL ========\n");
 
 #ifndef SOLO_FASE2
   printf("Fase 1 (sin sincronizacion):\n");
   printf("  Total vehiculos:    %d\n", vehiculos_fase1);
   printf("  Accidentes:         %d\n", accidentes_fase1);
-  printf("  Vehiculos/carril:   Norte=%d Sur=%d Este=%d Oeste=%d\n",
-         cruzados_fase1[NORTE], cruzados_fase1[SUR], cruzados_fase1[ESTE],
-         cruzados_fase1[OESTE]);
+  printf("  Vehiculos/carril:   Norte=%d Sur=%d Este=%d Oeste=%d\n", cruzados_fase1[NORTE], cruzados_fase1[SUR], cruzados_fase1[ESTE], cruzados_fase1[OESTE]);
   printf("  Tiempo simulacion: %.3f segundos\n", tiempo_fase1);
 #endif
 
@@ -149,9 +143,7 @@ void imprimir_reporte(double tiempo_fase1, double tiempo_fase2,
   printf("Fase 2 (con semaforos):\n");
   printf("  Total vehiculos:    %d\n", vehiculos_cruzados);
   printf("  Accidentes:         %d\n", accidentes);
-  printf("  Vehiculos/carril:   Norte=%d Sur=%d Este=%d Oeste=%d\n",
-         cruzados_por_carril[NORTE], cruzados_por_carril[SUR],
-         cruzados_por_carril[ESTE], cruzados_por_carril[OESTE]);
+  printf("  Vehiculos/carril:   Norte=%d Sur=%d Este=%d Oeste=%d\n", cruzados_por_carril[NORTE], cruzados_por_carril[SUR], cruzados_por_carril[ESTE], cruzados_por_carril[OESTE]);
   printf("  Tiempo simulacion: %.3f segundos\n", tiempo_fase2);
 #endif
 
@@ -159,8 +151,7 @@ void imprimir_reporte(double tiempo_fase1, double tiempo_fase2,
   double overhead = tiempo_fase2 - tiempo_fase1;
   double porcentaje = (overhead / tiempo_fase1) * 100.0;
   printf("ANALISIS:\n");
-  printf("  Overhead de sincronizacion: +%.3f seg (+%.1f%%)\n", overhead,
-         porcentaje);
+  printf("  Overhead de sincronizacion: +%.3f seg (+%.1f%%)\n", overhead, porcentaje);
 #endif
 
   printf("========================================================\n");
@@ -258,8 +249,7 @@ int main(void) {
 #endif
 
   /*=-=-= REPORTE =-=-=*/
-  imprimir_reporte(tiempo_fase1, tiempo_fase2, accidentes_fase1,
-                   vehiculos_fase1, cruzados_fase1);
+  imprimir_reporte(tiempo_fase1, tiempo_fase2, accidentes_fase1, vehiculos_fase1, cruzados_fase1);
 
   return 0;
 }
