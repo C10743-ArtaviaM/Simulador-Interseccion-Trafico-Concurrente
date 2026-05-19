@@ -34,7 +34,8 @@ en_cruce = 0;
 
 **B)** Invariante del semáforo: ¿Qué invariante garantiza el semáforo binario en `Fase 2`? Explíquelo con sus propias palabras. ¿Por qué se inicializa en $1$ y no en $0$?
 
-> ***R$_2$/*** Garantiza que dos vehículos no intenten cruzar en el mismo momento, previniendo choques en la autopista. Se inicializa en $1$ porque esto permite que el primer hilo entre de forma correcta, si se inicializara en $0$ significa que el primer hilo no podría entrar, por lo que estaría bloqueado y se generaría un deadlock.
+> ***R$_2$/*** Garantiza que dos vehículos no intenten cruzar en el mismo momento, previniendo choques en la autopista. Traducido al contexto de hilos significa que solamente un hilo puede estar dentro de la sección crítica al mismo tiempo.
+Se inicializa en $1$ porque esto permite que el primer hilo entre de forma correcta, si se inicializara en $0$ significa que ningún hilo podría entrar, por lo que estaría bloqueado y se generaría un deadlock.
 	
 **C)** Overhead: ¿Por qué la `Fase 2` suele tomar más tiempo que la `Fase 1`? ¿Este
 overhead es aceptable? ¿En qué tipo de sistema NO sería aceptable?
@@ -94,7 +95,18 @@ ANALISIS:
 ========================================================
 ```
 
-> ***R$_4$/*** Conforme hay más vehiculos, se nota un crecimiento en la cantidad de accidentes, no obstante, la tasa de accidentes disminuye porcentualmente. Esto se da porque al principio todos los hilos compiten por el mismo recurso, o sea, cruzar la calle. Es aquí donde principalemente se dan los choques, este comportamiento sí tiene sentido en el contexto de semáforos e hilos.
+> ***R$_4$/*** Conforme hay más vehiculos, se nota un crecimiento en la cantidad de accidentes, no obstante, la tasa de accidentes disminuye porcentualmente. Esto se da porque al principio todos los hilos compiten por el mismo recurso, o sea, cruzar la calle. Es aquí donde principalmente se dan los choques, este comportamiento sí tiene sentido en el contexto de semáforos e hilos.
+
+Para 5 vehículos por intersección se generó 3 / 20 = 0,15
+Hay 15% de probabilidad de accidentes.
+
+Para 20 vehiculos por intersección se generó 5 / 80 = 0,06
+Hay 6% de probabilidad de accidentes.
+
+Para 50 vehiculos por intersección se generó 6 / 200 = 0, 03
+Hay 3% de probabilidad de accidentes.
+
+Por lo que al aumentar el número de vehículos, la tasa de accidentes disminuye.
 
 **E)** Extensión (opcional, bonus $+0.5$): ¿Cómo modificaría el sistema para permitir que más de un vehículo cruce simultáneamente (carril de doble vía)? ¿Qué tipo de semáforo usaría?
 
